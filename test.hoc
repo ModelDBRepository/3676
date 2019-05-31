@@ -1,0 +1,69 @@
+// test extracellular and linear circuit extracellular connection
+// with simple 2 segment model
+
+create a, b
+access a
+a { pt3dadd(0,0,0,1) pt3dadd(1,0,0,1) }
+b { pt3dadd(0,100,0,1) pt3dadd(1,100,0,1) }
+
+forall {
+	nseg = 2
+	cm=0
+	L = 20000 // 2 cm
+	diam = 10000 // 1 cm
+	// axial resistance Mohm/cm is  4*Ra/PI/diam^2*1e2
+	Ra = 1/(4/PI/diam^2*1e2)
+	// so resistance between compartment centers should be 1 MOhm
+	print "ri(.9) should be 1MOhm: ", ri(.9)
+	insert pas e_pas = 0
+	// membrane conductance S/cm2
+	g_pas = 1e-6/(area(.9)*1e-8)
+	print "(MOhm resistance from compartment center across membrane is ", 1/(g_pas(.1)*area(.9)*1e-2)
+	insert extracellular
+	xg = g_pas
+	xg(.9)=0
+	xraxial = 1
+	g_pas(.1) = 0
+}
+load_file("test1.ses")
+run()
+print "v(.1)+vext(.1)=", v(.1)+vext(.1)
+print "v(.9)+vext(.9)=", v(.9)+vext(.9)
+print "vext(.9)=", vext(.9)
+print "vext(.1)=", vext(.1)
+
+//now connect a to b via linearmechanism
+forall xg = 0
+objref gmat, cmat, bvec, e, xl, layer, sl, lm
+gmat = new Matrix(2,2)
+cmat = new Matrix(2,2,2)
+bvec = new Vector(2)
+e = new Vector(2)
+sl = new SectionList()
+xl = new Vector(2)
+layer = new Vector(2)
+layer.fill(1)
+a sl.append()
+b sl.append()
+xl.fill(.25)
+proc addg() {
+        gmat.x[$1][$1] += $3
+        gmat.x[$1][$2] -= $3
+        gmat.x[$2][$1] -= $4
+        gmat.x[$2][$2] += $4 
+}
+addg(0,1,g_pas(.9), g_pas(.9))
+lm = new LinearMechanism(cmat, gmat, e, bvec, sl, xl, layer)
+run()
+print "a.v(.1)+a.vext(.1)=", a.v(.1)+a.vext(.1)
+print "a.v(.9)+a.vext(.9)=", a.v(.9)+a.vext(.9)
+print "a.vext(.9)=", a.vext(.9)
+print "a.vext(.1)=", a.vext(.1)
+
+print "b.vext(.1)=", b.vext(.1)
+print "b.vext(.9)=", b.vext(.9)
+print "b.v(.9)+b.vext(.9)=", b.v(.9)+b.vext(.9)
+print "b.v(.1)+b.vext(.1)=", b.v(.1)+b.vext(.1)
+
+
+

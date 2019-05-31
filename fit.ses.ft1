@@ -1,0 +1,15 @@
+ParmFitness: Unnamed multiple run protocol
+	FitnessFunction: Unnamed Function Fitness
+		a1*exp(-($1-1000)/l1) - a2*exp(-($1-1000)/l2)
+		RegionFitness:
+
+	FitnessFunction: Unnamed Function Fitness
+		a1*exp(-($1-1000)/l1)+ a2*exp(-($1-1000)/l2)
+		RegionFitness:
+
+	Parameters:
+		"a1", 0.818485, -1e+06, 1e+06, 1, 0
+		"a2", 0.181507, -1e+06, 1e+06, 1, 0
+		"l1", 28.359, -1e+06, 1e+06, 1, 0
+		"l2", 129.129, -1e+06, 1e+06, 1, 0
+End ParmFitness

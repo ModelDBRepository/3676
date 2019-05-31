@@ -1,0 +1,10 @@
+load_file("nrngui.hoc")
+objref box
+box = new VBox()
+box.intercept(1)
+xpanel("")
+xbutton("Fig 2", "xopen(\"fig2.hoc\")  box.unmap()")
+xbutton("Fig 3B", "xopen(\"fig3.hoc\")  box.unmap()")
+xpanel()
+box.intercept(0)
+box.map("Run Example")

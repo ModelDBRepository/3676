@@ -1,0 +1,8 @@
+Bokil, H., Laaris, N., Blinder, K., Ennis, M., and Keller, A.
+(2001) Ephaptic interactions in the mammalian olfactory system.
+J. Neurosci. 21:RC173(1-5)
+
+The model presented in the above paper was implemented in the NEURON
+simulation environment by Michael Hines. The example simulations
+produce results similar to Fig 2 and Figure 3B.
+

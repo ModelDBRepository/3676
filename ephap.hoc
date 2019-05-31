@@ -1,0 +1,97 @@
+// Bokil et. al. (2001) Ephaptic interactions in the mammalian olfactory system.
+// J. Neurosci. 21:RC173(1-5)
+
+// two passive cables with no connection to ground or extracellular conductance
+// eventually grounded by a linear circuit
+// for the passive case we'll stimulate at the middle to get
+// second order correct spatial decay in the extracellular and unstimulated
+// axon.
+
+Ns=1	  // number of stimulated axons
+N=2	  // total number of axons
+beta=.05  // ratio of extracellular to axon cross sectional area
+
+create a, b // a will be stimulated, b unstimulated
+access a
+
+// display as adjacent in shape plots
+a { pt3dadd(0,0,0,1) pt3dadd(1,0,0,1) }
+b { pt3dadd(0,100,0,1) pt3dadd(1,100,0,1) }
+
+//physical properties of cable
+forall {
+	Ra = 100
+	nseg=201
+	diam = .2
+	L = 2000 // lambda2=sqrt(Rm*d/Ri/4) = .0129 cm
+	insert extracellular  xg = 0
+	xraxial = 1e9
+	insert pas  e_pas = 0  g_pas = .0003
+}
+
+
+// The extracellular axial resistance is associated with axon a
+// and has a value of (internal axial resistivity)*Ns/N/beta
+// Axon b will be connected to the extracellular nodes of axon a by
+// a linear mechanism in the extcelnet procedure
+
+proc set_re() {
+	// the extracellular mechanism for a is used to simulate the transverse
+	// resistance (MOhm/cm)
+	// resistivity of ri*Ns/N/beta = 4*Ra/PI/diam^2*Ns/N/beta*1e2 (meghohm/cm)
+	a.xraxial = 4*Ra/PI/diam^2*Ns/N/beta*1e2
+}
+
+// a large conductance between the a.vext and b.vext connects the axons
+// the conductance is asymmetric to account for N-Ns unstimulated identical
+// axons. Ie i from b.vext to a.vext is N-Ns/Ns times larger than i from a to b
+// There are a.nseg of these large conductance connections.
+
+objref gmat, cmat, bvec, e, xl, layer, sl, lm
+// must be called whenever nseg, Ns, or N is changed.
+proc extcelnet() {local i, ns
+	ns = a.nseg
+	gmat = new Matrix(2*ns, 2*ns, 2) // sparse
+	cmat = new Matrix(2*ns, 2*ns, 2) // sparse and 0
+	bvec = new Vector(2*ns) // also 0
+	e = new Vector(2*ns) // extracellular potential
+	// order is all a then all b, the e nodes are equivalent to a.vext
+	sl = new SectionList()
+	xl = new Vector(2*ns)
+	layer = new Vector(2*ns)
+	layer.fill(1) // all connections are between a.vext and b.vext
+	for i=0, ns-1 {
+		a sl.append()
+		xl.x[i] = (i+.5)/ns
+	}
+	for i=0, ns-1 {
+		b sl.append()
+		xl.x[nseg + i] = (i+.5)/ns
+	}
+	lm = new LinearMechanism(cmat, gmat, e, bvec, sl, xl, layer)
+	// the above really only needs to be done when nseg changes
+	// Following are the parameter dependent assignments.
+	set_re()
+	for i=0, ns-1 {
+// the conductance is asymmetric to account for N-Ns unstimulated identical
+// axons and Ns stimulated identical axons
+		addg(i, ns+i, 10*(N-Ns), 10*Ns)
+	}
+}
+
+proc addg() {
+	gmat.x[$1][$1] += $3
+	gmat.x[$1][$2] -= $3
+	gmat.x[$2][$1] -= $4
+	gmat.x[$2][$2] += $4
+}
+
+extcelnet()
+
+/*
+xpanel("PARAMS")
+xvalue("Number Stimulated Ns", "Ns", 1, "extcelnet()")
+xvalue("Total Number N", "N", 1, "extcelnet()")
+xvalue("beta", "beta", 1, "set_re()")
+xpanel()
+*/

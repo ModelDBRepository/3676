@@ -1,0 +1,25 @@
+// This example demonstrates that two effects not discussed in the paper
+// can result in slightly greater safety factor. I.e. no ephaptic excitation
+// occurs in the model with a ratio of stimulated to unstimulated
+// axons of 4.  The first change is to ground the extracellular network over
+// a small initial region (we also ground the distal region but that is not
+// important here) to simulate axons entering a fascicle. This eliminates
+// the large response in axon b due to initiation of the spike in axon a.
+// (see the black curve in the lower part of fig 3B.)
+// The second change is to increase the temperature so that the hh rate constants
+// are three times their value for squid at 6.3degrees. This produces narrower
+// axon spikes and thus the time that axon b is stimulated ephaptically
+// is somewhat shorter, giving it less time to reach threshold.
+// Other effects such as increased threshold of receptor cell axons
+// or leaky fascicles could also reduce the ephaptic coupling.
+
+load_file("ephap.hoc")
+forall uninsert pas
+forall insert hh
+load_file("ephap4.ses")
+forall nseg*=3
+{beta = .05 extcelnet()}
+xg(0:.1) = 1:1
+xg(.9:1) = 1:1
+run()
+

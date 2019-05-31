@@ -1,0 +1,9 @@
+// produces result similar to Fig 3B.
+load_file("ephap.hoc")
+forall uninsert pas
+forall insert hh
+load_file("ephap3.ses")
+forall nseg*=3
+{beta = 10 extcelnet()}
+run()
+

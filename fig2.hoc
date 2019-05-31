@@ -1,0 +1,42 @@
+// Automatically display figure 2B and provide a
+// Grapher for generating curves for figure 2A.
+load_file("ephap.hoc")
+load_file("ephap2.ses")
+run()
+Graph[1].exec_menu("Keep Lines")
+Graph[1].exec_menu("Keep Lines")
+{N=19 extcelnet()}
+run()
+
+// This simulation seems to produce different quantitative (but same
+// qualitative) results
+// from those shown in Fig 2B with regard to height at x=1000 and relative minima
+// of unstimulated axon (x=~1100).
+//
+// The simulation output has been verified to be a linear superposition
+// of two exponentials with lambda1 and lambda2 given in the paper.
+// The simulation output for N=2 is best fit by
+// stimulated a1*exp(-($1-1000)/l1)+ a2*exp(-($1-1000)/l2)
+// unstimulated a1*exp(-($1-1000)/l1) - a2*exp(-($1-1000)/l2)
+//  "a1", 0.818485
+//  "a2", 0.181507
+//  "l1", 28.359
+//  "l2", 129.129
+/*
+This is consistent with a private communication from
+Hemant Bokil <bokil@postbox.div111.lucent.com>
+"
+I checked my notes for the anaytical calculations and the complete
+formulae are 
+V_A(x)=0.5*(1-f)*sqrt(r_i * r_m)*exp(-x/l2)+0.5*f*sqrt(r_i*r_m)
+                *sqrt((1+beta)/beta)*exp(-x/l1)
+and
+V_B(x)=-0.5*f*sqrt(r_i*r_m)*exp(-x/l2)+0.5*f*sqrt(r_i*r_m)
+                *sqrt((1+beta)/beta)*exp(-x/l1)
+
+where l1 and l2 are as listed in the paper. For plotting 2b, i divided
+both these expressions by V_A(0) and this leads to amplitudes of 0.8207
+and -0.1791, for V_B(x) (with f=0.5; 2 neurons), very close to your
+answers (perhaps a rounding error ?).
+"
+*/
